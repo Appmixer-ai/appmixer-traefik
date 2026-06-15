@@ -1,0 +1,12 @@
+displayName: Appmixer Webhook Plugin
+type: middleware
+iconPath: .assets/icon.png
+
+import: github.com/traefik/webhook
+
+summary: 'Parse and add FlowId and TriggerId Request Headers'
+
+testData:
+  Headers:
+    X-Demo: test
+    X-URL: '{{URL}}'
