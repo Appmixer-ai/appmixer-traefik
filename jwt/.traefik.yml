@@ -1,0 +1,11 @@
+displayName: Appmixer JWT Plugin
+type: middleware
+iconPath: .assets/icon.png
+
+import: github.com/traefik/jwt
+
+summary: 'Decode JWT and get userId'
+
+testData:
+  Headers:
+    X-User-Id: test
