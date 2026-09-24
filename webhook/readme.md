@@ -1,3 +1,22 @@
+# Appmixer webhook plugin
+
+Sets per-webhook rate-limit keys for public webhook requests.
+
+| Path | Flow header | Trigger header |
+|---|---|---|
+| `/flows/{flowId}/components/{componentId}` | `{flowId}` | `{flowId}/{componentId}` |
+| `/invoke/webhook/{aliasId}/{alias}` | (removed) | `alias:{aliasId}/{alias}` |
+| anything else | (removed) | `ip:<client ip>` |
+
+Client-supplied values of the configured headers are always removed.
+
+| Option | Default | Description |
+|---|---|---|
+| `headers` | `X-Flow-Id: flowId`, `X-Trigger-Id: triggerId` | Header name → value (`flowId` or `triggerId`). Other values fail at startup. |
+| `ipDepth` | `0` | Client IP for the fallback key. `0`: TCP peer address. `N`: Nth `X-Forwarded-For` entry from the right. |
+
+---
+
 This repository includes an example plugin, `demo`, for you to use as a reference for developing your own plugins.
 
 [![Build Status](https://github.com/traefik/plugindemo/workflows/Main/badge.svg?branch=master)](https://github.com/traefik/plugindemo/actions)
