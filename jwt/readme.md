@@ -1,3 +1,21 @@
+# Appmixer JWT plugin
+
+Sets `X-User-Id` so Traefik `rateLimit` middlewares (`sourceCriterion.requestHeaderName: X-User-Id`) can limit per user.
+
+- Token present and decodable: `X-User-Id: <userId>|<client ip>`. `<userId>` is the first claim from `userIdClaims` found in the token.
+- No token, or it can't be decoded: `X-User-Id: ip:<client ip>`.
+- A client-supplied `X-User-Id` is always replaced.
+
+The signature is **not** verified (the backend does that). Adding the client IP to the key means a forged token can only fill a bucket for the attacker's own IP.
+
+| Option | Default | Description |
+|---|---|---|
+| `userIdClaims` | `[originalUserId, id, sub]` | Claims tried in order. `originalUserId` comes first so group-context tokens are keyed on the real member, not the shared group user. |
+| `userIdClaim` | | Legacy single claim, used only when `userIdClaims` is empty. |
+| `ipDepth` | `0` | `0`: TCP peer address. `N`: Nth `X-Forwarded-For` entry from the right (like Traefik's `ipStrategy.depth`); falls back to the peer when the header is shorter. Only use `N > 0` when the entry point trusts the proxy in front (`forwardedHeaders.trustedIPs`). |
+
+---
+
 This repository includes an example plugin, `demo`, for you to use as a reference for developing your own plugins.
 
 [![Build Status](https://github.com/traefik/plugindemo/workflows/Main/badge.svg?branch=master)](https://github.com/traefik/plugindemo/actions)

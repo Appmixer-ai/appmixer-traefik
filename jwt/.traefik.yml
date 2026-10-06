@@ -4,8 +4,11 @@ iconPath: .assets/icon.png
 
 import: github.com/traefik/jwt
 
-summary: 'Decode JWT and get userId'
+summary: 'Set X-User-Id rate-limit key from the Appmixer JWT and client IP'
 
 testData:
-  Headers:
-    X-User-Id: test
+  userIdClaims:
+    - originalUserId
+    - id
+    - sub
+  ipDepth: 0
