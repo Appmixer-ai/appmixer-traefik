@@ -6,8 +6,9 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
-	"text/template"
 )
+
+var flowComponentPath = regexp.MustCompile(`/flows/([a-f0-9-]+)/components/([a-zA-Z0-9_-]+)`)
 
 // Config the plugin configuration.
 type Config struct {
@@ -21,46 +22,36 @@ func CreateConfig() *Config {
 	}
 }
 
-// Demo a Demo plugin.
-type Demo struct {
-	next     http.Handler
-	headers  map[string]string
-	name     string
-	template *template.Template
+// Webhook a webhook plugin.
+type Webhook struct {
+	next    http.Handler
+	headers map[string]string
+	name    string
 }
 
-// New created a new Demo plugin.
+// New creates a new webhook plugin.
 func New(ctx context.Context, next http.Handler, config *Config, name string) (http.Handler, error) {
 	if len(config.Headers) == 0 {
 		return nil, fmt.Errorf("headers cannot be empty")
 	}
 
-	return &Demo{
-		headers:  config.Headers,
-		next:     next,
-		name:     name,
-		template: template.New("demo").Delims("[[", "]]"),
+	return &Webhook{
+		headers: config.Headers,
+		next:    next,
+		name:    name,
 	}, nil
 }
 
-func (a *Demo) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
-	re := regexp.MustCompile(`/flows/([a-f0-9-]+)/components/([a-zA-Z0-9_-]+)`)
-	matches := re.FindStringSubmatch(req.URL.String())
+func (a *Webhook) ServeHTTP(rw http.ResponseWriter, req *http.Request) {
+	matches := flowComponentPath.FindStringSubmatch(req.URL.Path)
 
 	if matches == nil {
 		a.next.ServeHTTP(rw, req)
 		return
 	}
 
-	flowId := matches[1]
-	triggerId := matches[2]
-
-	req.Header.Set("X-Flow-Id", flowId)
-	req.Header.Set("X-Trigger-Id", triggerId)
-
-	for key, values := range req.Header {
-		fmt.Printf("%s: %s\n", key, values[0])
-	}
+	req.Header.Set("X-Flow-Id", matches[1])
+	req.Header.Set("X-Trigger-Id", matches[2])
 
 	a.next.ServeHTTP(rw, req)
 }
